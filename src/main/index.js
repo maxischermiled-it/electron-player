@@ -1,32 +1,73 @@
-import { app } from 'electron'
+'use strict'
 
-import BrowserWinHandler  from './BrowserWinHandler'
-import { default as manager } from './manager'
+import { app, BrowserWindow } from 'electron'
+import '../renderer/store'
+const ipc = require('electron').ipcMain
 
+/**
+ * Set `__static` path to static files in production
+ * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
+ */
+if (process.env.NODE_ENV !== 'development') {
+  global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
+}
 
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-  // On macOS it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
+let mainWindow
+const winURL = process.env.NODE_ENV === 'development'
+  ? `http://localhost:9080`
+  : `file://${__dirname}/index.html`
 
-  
-  if (process.platform !== 'darwin') app.quit()
-
-  /// #if env == 'DEBUG'
-  console.log('All of the window was closed.')
-  /// #endif
-})
-
-app.whenReady()
-  .then(() => {
-    manager.createManager()
+function createWindow () {
+  /**
+   * Initial window options
+   */
+  mainWindow = new BrowserWindow({
+    height: 563,
+    useContentSize: true,
+    width: 1000
   })
 
+  mainWindow.loadURL(winURL)
 
-/// #if env == 'DEBUG'
-app.on('quit', () => {
-  console.log('Application is quit')
+  mainWindow.on('closed', () => {
+    mainWindow = null
+  })
+}
+
+app.on('ready', createWindow)
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit()
+  }
 })
-/// #endif
 
+app.on('activate', () => {
+  if (mainWindow === null) {
+    createWindow()
+  }
+})
 
+ipc.on('orders.item.add', (event, data) => {
+  console.info('main : ipc : data : ' + JSON.stringify(data))
+})
+
+/**
+ * Auto Updater
+ *
+ * Uncomment the following code below and install `electron-updater` to
+ * support auto updating. Code Signing with a valid certificate is required.
+ * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-electron-builder.html#auto-updating
+ */
+
+/*
+import { autoUpdater } from 'electron-updater'
+
+autoUpdater.on('update-downloaded', () => {
+  autoUpdater.quitAndInstall()
+})
+
+app.on('ready', () => {
+  if (process.env.NODE_ENV === 'production') autoUpdater.checkForUpdates()
+})
+ */
