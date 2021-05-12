@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { EventEmitter } from 'events'
 import { BrowserWindow, app } from 'electron'
+
 const DEV_SERVER_URL = process.env.DEV_SERVER_URL
 const isProduction = process.env.NODE_ENV === 'production'
 const isDev = process.env.NODE_ENV === 'development'
@@ -55,8 +56,14 @@ export default class BrowserWinHandler {
         }
       }
     )
+
+    this.browserWindow.on('quit', () =>{
+      this.EventEmitter.emit("viewer_closed")
+    })
+
     this.browserWindow.on('closed', () => {
-      // Dereference the window object
+      // Dereference the window object      
+      
       this.browserWindow = null
     })
     this._eventEmitter.emit('created')
