@@ -24,7 +24,8 @@ function createWindow () {
   mainWindow = new BrowserWindow({
     height: 563,
     useContentSize: true,
-    width: 1000
+    // frame: false,
+    width: 800
   })
 
   mainWindow.loadURL(winURL)
@@ -48,9 +49,16 @@ app.on('activate', () => {
   }
 })
 
-ipc.on('orders.item.add', (event, data) => {
-  console.info('main : ipc : data : ' + JSON.stringify(data))
+ipc.on('orders:item:add', (event, data) => {
+  console.info('main : ipc : orders:item:add : ' + JSON.stringify(data))
 })
+
+// ipc.on('window:main:resize', (event, data) => {
+//   if (data) {
+//     console.info('main : ipc : window:main:resize : ' + JSON.stringify(data))
+//     mainWindow.setBounds({width: data.width, height: data.height})
+//   }
+// })
 
 /**
  * Auto Updater

@@ -3,12 +3,16 @@ import Vuex from 'vuex'
 
 import { createPersistedState, createSharedMutations } from 'vuex-electron'
 
-import modules from './modules'
+import player from './modules/player'
+import viewer from './modules/viewer'
 
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  modules,
+  modules: {
+    player,
+    viewer
+  },
   plugins: [
     createPersistedState(),
     createSharedMutations()
